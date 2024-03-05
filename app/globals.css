@@ -17,17 +17,18 @@
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
+}
+
+.uneven {
+  border-top-left-radius: 64px 5%;
+  border-top-right-radius: 9% 11%;
+  border-bottom-left-radius: 57px 14%;
+  border-bottom-right-radius: 10% 40%;
 }
