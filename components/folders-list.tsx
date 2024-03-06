@@ -2,74 +2,112 @@
 import {
   deleteFolderCategory,
   deleteMenuCategory,
-  getAllFolderCategoryData,
-  getAllMenuCategoryData,
+  searchFromMenuCategories,
 } from "@/services/firestore-services";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import SearchInput from "./search-input";
+import toast from "react-hot-toast";
+import {
+  FetchFolderCategory,
+  FetchMenuCategory,
+  IFoldersList,
+} from "@/interfaces";
 
-const FoldersList = () => {
-  const [loading, setLoading] = useState(false);
-  const [folderData, setFolderData] = useState<any[]>([]);
-  const [copyFolderData, setCopyFolderData] = useState<any[]>([]);
-  const [menuData, setMenuData] = useState<any[]>([]);
-  const [copyMenuData, setCopyMenuData] = useState<any[]>([]);
+const FoldersList: React.FC<IFoldersList> = ({
+  folderCategories,
+  menuCategories,
+}) => {
+  const [searching, setSearhing] = useState(false);
+  const [folderData, setFolderData] = useState<FetchFolderCategory[] | any[]>(
+    folderCategories || []
+  );
+  const [copyFolderData, setCopyFolderData] = useState<
+    FetchFolderCategory[] | any[]
+  >(folderCategories || []);
+  const [menuData, setMenuData] = useState<FetchMenuCategory[] | any[]>(
+    menuCategories || []
+  );
+  const [copyMenuData, setCopyMenuData] = useState<FetchMenuCategory[] | any[]>(
+    menuCategories || []
+  );
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleDeleteFolder = (id: string) => {
-    deleteFolderCategory(id).then((_value) =>
-      setFolderData((prevState) => prevState.filter((f) => f?.id !== id))
+    let userConfirmation = confirm(
+      "Are you sure you want to delete this folder category?"
     );
+    if (userConfirmation) {
+      deleteFolderCategory(id).then((_value) => {
+        setFolderData((prevState) => prevState.filter((f) => f?.id !== id));
+        toast.success("Folder Category Deleted", {
+          position: "bottom-center",
+        });
+      });
+    }
   };
 
   const handleDeleteMenu = (id: string) => {
-    deleteMenuCategory(id).then((_value) =>
-      setMenuData((prevState) => prevState.filter((f) => f?.id !== id))
+    let userConfirmation = confirm(
+      "Are you sure you want to delete this menu category?"
     );
+    if (userConfirmation) {
+      deleteMenuCategory(id).then((_value) => {
+        setMenuData((prevState) => prevState.filter((f) => f?.id !== id));
+        toast.success("Menu Category Deleted", {
+          position: "bottom-center",
+        });
+      });
+    }
   };
 
   useEffect(() => {
-    setLoading(true);
-    getAllFolderCategoryData()
-      .then((folderCategories) => {
-        setFolderData(folderCategories);
-        setCopyFolderData(folderCategories);
-      })
-      .catch((error) => console.error("List error: ", error));
-
-    getAllMenuCategoryData()
-      .then((menuCategories) => {
-        setMenuData(menuCategories);
-        setCopyMenuData(menuCategories);
-      })
-      .catch((error) => console.error("List error: ", error))
-      .finally(() => setLoading(false));
-  }, []);
+    setFolderData(folderCategories);
+    setCopyFolderData(folderCategories);
+    setMenuData(menuCategories);
+    setCopyMenuData(menuCategories);
+  }, [folderCategories, menuCategories]);
 
   useEffect(() => {
     if (searchQuery !== "") {
-      setMenuData(
-        copyMenuData?.filter((f) =>
-          (f?.name as string).toLowerCase().includes(searchQuery.toLowerCase())
-        )
-      );
+      // filter search
+      // setMenuData(
+      //   copyMenuData?.filter((f) =>
+      //     (f?.name as string).toLowerCase().includes(searchQuery.toLowerCase())
+      //   )
+      // );
+
+      // fire store search
+      const getSearchData = setTimeout(() => {
+        setSearhing(true);
+        searchFromMenuCategories(searchQuery)
+          .then((values) => {
+            setMenuData(values);
+            // console.log(values)
+          })
+          .finally(() => setSearhing(false));
+      }, 750);
+
+      return () => clearTimeout(getSearchData);
     } else {
       setMenuData(copyMenuData);
     }
   }, [searchQuery]);
 
-  if (loading) {
-    return <div className="text-center text-lg">Loading...</div>;
-  } else if (folderData?.length !== 0) {
+  if (folderData?.length !== 0) {
     return (
       <div className="w-full flex flex-col gap-6">
         <SearchInput
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
         />
-        {folderData.map((folder) => {
+        {searching ? (
+          <div className="text-lg text-primary-text">
+            Searching your menu...
+          </div>
+        ) : null}
+        {folderData.map((folder: FetchFolderCategory) => {
           return (
             <div
               key={folder?.id}
@@ -138,7 +176,7 @@ const FoldersList = () => {
 
               {menuData
                 ?.filter((menu) => menu?.folderName === folder?.name)
-                .map((menu) => (
+                .map((menu: FetchMenuCategory) => (
                   <div
                     key={menu?.id}
                     className={`

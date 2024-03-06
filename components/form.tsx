@@ -43,6 +43,7 @@ const Form = ({
   const [loading, setLoading] = useState(false);
   const [image, setImage] = useState<File | null>(null);
   const [foldersData, setFoldersData] = useState<any[]>([]);
+  const [isFolderFetched, setIsFolderFetched] = useState(false);
   const [currentFolderId, setCurrentFolderId] = useState("");
   const [formData, setFormData] = useState<FormState>({
     name: "",
@@ -67,7 +68,7 @@ const Form = ({
     setError("");
   };
 
-  const handleSubmit = (e: any) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     setLoading(true);
     e.preventDefault();
     if (image !== null) {
@@ -294,9 +295,16 @@ const Form = ({
     }
   };
 
-  const handleChange = (e: any) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     if (e.target.name === "image") {
-      setImage(e.target.files?.length !== undefined ? e.target.files[0] : null);
+      const inputElement = e.target as HTMLInputElement;
+      if (inputElement.files && inputElement.files.length > 0) {
+        setImage(inputElement.files[0]);
+      } else {
+        setImage(null); // or handle the case where files are not present
+      }
     } else if (e.target.name === "name" && e.target.value?.length === 51) {
       // do nothing
     } else {
@@ -335,13 +343,14 @@ const Form = ({
       getAllFolderCategoryData()
         .then((folderCategories) => {
           setFoldersData(folderCategories);
+          setIsFolderFetched(true);
         })
         .finally(() => setLoading(false));
     }
   }, []);
 
   useEffect(() => {
-    if (!isFolder && foldersData?.length === 0) {
+    if (!isFolder && foldersData?.length === 0 && isFolderFetched) {
       setFolderError("No Folder available please create folder category.");
     } else {
       setFolderError("");
@@ -489,7 +498,9 @@ const Form = ({
               </option>
               {foldersData?.length > 0 ? (
                 foldersData?.map((data) => (
-                  <option value={data?.id}>{data?.name}</option>
+                  <option key={data?.id} value={data?.id}>
+                    {data?.name}
+                  </option>
                 ))
               ) : (
                 <option value={""} disabled>

@@ -1,10 +1,21 @@
 import FoldersList from "@/components/folders-list";
-import SearchInput from "@/components/search-input";
+import Loading from "@/components/loading";
+import { FetchFolderCategory, FetchMenuCategory } from "@/interfaces";
+import {
+  getAllFolderCategoryData,
+  getAllMenuCategoryData,
+} from "@/services/firestore-services";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import React, { Suspense } from "react";
 
-const Page = () => {
+const Page = async () => {
+  // data fetching
+  const [folderCategories, menuCategories] = await Promise.all([
+    getAllFolderCategoryData(),
+    getAllMenuCategoryData(),
+  ]);
+
   return (
     <main
       className="
@@ -35,7 +46,12 @@ const Page = () => {
           Create Cateogry Folder
         </div>
       </Link>
-      <FoldersList />
+      <Suspense fallback={<Loading />}>
+        <FoldersList
+          folderCategories={folderCategories as FetchFolderCategory[]}
+          menuCategories={menuCategories as FetchMenuCategory[]}
+        />
+      </Suspense>
       <Link
         href={"/create-category"}
         className="

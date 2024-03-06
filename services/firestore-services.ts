@@ -1,23 +1,10 @@
+import { IFolderCategory, IMenuCategory } from "@/interfaces";
 import { db } from "@/utils/firebase-config";
-import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, updateDoc } from "firebase/firestore";
+import { addDoc, and, collection, deleteDoc, doc, endAt, getDoc, getDocs, or, query, startAt, updateDoc, where } from "firebase/firestore";
 
 // Collections
 export const menuCategoryCollection = collection(db, "menuCategories");
 export const folderCategoryCollection = collection(db, "folderCategories");
-
-interface IFolderCategory {
-  name: string;
-  imageUrl?: string;
-}
-
-interface IMenuCategory {
-  name: string;
-  description?: string;
-  folderId: string;
-  folderName: string;
-  imageUrl?: string;
-  items: number;
-}
 
 // CRUD functions for menu cateogory
 export const addMenuCategory = async (data: IMenuCategory) => {
@@ -77,4 +64,12 @@ export const updateFolderCategory = async (id: string, data: IFolderCategory) =>
   const updateField = doc(db, "folderCategories", id);
   const isUpdated = await updateDoc(updateField, { ...data });
   return isUpdated;
+}
+
+// Search Query functions
+export const searchFromMenuCategories = async (name: string) => {
+  const searchQuery = query(menuCategoryCollection, where("name", "==", name));
+  const menuCategoriesSnapShot = await getDocs(searchQuery);
+  const menuCategories = menuCategoriesSnapShot.docs.map((category) => ({ ...category.data(), id: category.id }));
+  return menuCategories;
 }
