@@ -80,12 +80,15 @@ const FoldersList: React.FC<IFoldersList> = ({
       // fire store search
       const getSearchData = setTimeout(() => {
         setSearhing(true);
-        searchFromMenuCategories(searchQuery)
-          .then((values) => {
-            setMenuData(values);
-            // console.log(values)
-          })
-          .finally(() => setSearhing(false));
+        const getSearchResult = async () => {
+          const searchResult = await searchFromMenuCategories(searchQuery);
+          if (searchResult) {
+            setMenuData(searchResult);
+          }
+          setSearhing(false);
+        };
+
+        getSearchResult();
       }, 750);
 
       return () => clearTimeout(getSearchData);

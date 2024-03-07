@@ -16,3 +16,4 @@
 - Edit folder / menu navigation added to settings icon.
 
 - All types and interfaces are added in seperate files.
+- .then removed from (non void) functions.
