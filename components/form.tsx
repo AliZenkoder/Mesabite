@@ -23,14 +23,7 @@ import toast from "react-hot-toast";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useRouter } from "next/navigation";
-
-type FormState = {
-  name: string;
-  description: string;
-  imageUrl: string;
-  folderId: string;
-  items: number;
-};
+import { FormState } from "@/types";
 
 const Form = ({
   isFolder,

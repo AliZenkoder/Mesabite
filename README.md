@@ -14,3 +14,5 @@
 - MenuItem component added.
 - Inputs border radius and skew styles updated.
 - Edit folder / menu navigation added to settings icon.
+
+- All types and interfaces are added in seperate files.

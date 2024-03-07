@@ -1,15 +1,9 @@
-import { FetchFolderCategory, FetchMenuCategory } from "@/interfaces";
+import { FetchMenuCategory } from "@/interfaces";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import MenuItem from "@/components/menu-item";
-
-type FolderItem = {
-  folder: FetchFolderCategory;
-  handleDeleteFolder: (id: string) => void;
-  handleDeleteMenu: (id: string) => void;
-  menuData: FetchMenuCategory[] | [];
-};
+import { FolderItem } from "@/types";
 
 const FolderItem = ({
   folder,

@@ -1,18 +1,7 @@
 "use client";
 import React, { FC } from "react";
 import { useRouter } from "next/navigation";
-
-interface IButtonProps {
-  /**
-   * This prop is for the styling of component
-   */
-  variant: "primary" | "secondary";
-  type?: "submit" | "button" | "reset";
-  disabled?: boolean;
-  handleClick?: () => void;
-  navigateLink?: string;
-  children: React.ReactNode;
-}
+import { IButtonProps } from "@/interfaces";
 
 const Button: FC<IButtonProps> = ({
   variant,

@@ -1,11 +1,7 @@
 "use client";
+import { ISearchInput } from "@/interfaces";
 import Image from "next/image";
 import React from "react";
-
-interface ISearchInput {
-  searchQuery?: string;
-  setSearchQuery?: React.Dispatch<React.SetStateAction<string>>;
-}
 
 const SearchInput: React.FC<ISearchInput> = ({
   searchQuery,

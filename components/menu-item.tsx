@@ -1,12 +1,7 @@
-import { FetchMenuCategory } from "@/interfaces";
+import { MenuItem } from "@/types";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
-
-type MenuItem = {
-  menu: FetchMenuCategory;
-  handleDeleteMenu: (id: string) => void;
-};
 
 const MenuItem = ({ menu, handleDeleteMenu }: MenuItem) => {
   return (
