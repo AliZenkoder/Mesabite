@@ -50,7 +50,7 @@ export const getAllFolderCategoryData = async () => {
 export const getFolderCategoryData = async (id: string) => {
   const folderCategoryRef = doc(db, "folderCategories", id);
   const folderCategorySnapShot = await getDoc(folderCategoryRef);
-  const folderCategoryData = folderCategorySnapShot?.data();
+  const folderCategoryData = folderCategorySnapShot.exists() ? folderCategorySnapShot.data() : null;
   return folderCategoryData;
 }
 

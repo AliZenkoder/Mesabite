@@ -20,6 +20,8 @@ import {
   updateMenuCategory,
 } from "@/services/firestore-services";
 import toast from "react-hot-toast";
+import { useFormik } from "formik";
+import * as Yup from "yup";
 import { useRouter } from "next/navigation";
 
 type FormState = {
@@ -55,6 +57,12 @@ const Form = ({
   const [error, setError] = useState("");
   const [folderError, setFolderError] = useState("");
 
+  const validationSchema = Yup.object().shape({
+    name: Yup.string()
+      .required("Name is required")
+      .max(50, "Name must be at most 50 characters"),
+  });
+
   const resetState = () => {
     setFormData({
       name: "",
@@ -66,137 +74,147 @@ const Form = ({
     setCurrentFolderId("");
     setImage(null);
     setError("");
+    formik.resetForm();
   };
+  // const  = () => {
+  //   return new Promise((resolve,reject) => {
+  //     uploadBytes(imageRef, image)
+  //       .then((value: UploadResult) => {
+  //         resolve(value)
+  //         reject()
+  //       })
+  //       .catch(() => {
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  //       })
+  //     })
+  // }
+  const handleSubmit = async () => {
     setLoading(true);
-    e.preventDefault();
+    // e.preventDefault();
     if (image !== null) {
       const imageRef = ref(storage, `images/${v4()}`);
-      uploadBytes(imageRef, image)
-        .then((value: UploadResult) => {
-          if (value) {
-            getDownloadURL(value.ref).then((url) => {
-              setFormData((prevState) => ({ ...prevState, imageUrl: url }));
-              if (isFolder) {
-                if (isEdit && id) {
-                  updateFolderCategory(id, {
-                    name: formData.name,
-                    imageUrl: url,
-                  })
-                    .then((_value) => resetState())
-                    .catch((error) => {
-                      setError("Something went wrong category not created");
-                      console.error("Category Error: ", error);
-                      toast.error("Something went wrong");
-                    })
-                    .finally(() => {
-                      toast.success(
-                        `Folder Category ${isEdit ? "Updated" : "Created"}.`,
-                        {
-                          duration: 5000,
-                          position: "bottom-center",
-                        }
-                      );
-                      setLoading(false);
-                      router.push("/");
-                    });
-                } else {
-                  addFolderCategory({
-                    name: formData.name,
-                    imageUrl: url,
-                  })
-                    .then((_value) => resetState())
-                    .catch((error) => {
-                      setError("Something went wrong category not created");
-                      console.error("Category Error: ", error);
-                      toast.error("Something went wrong");
-                    })
-                    .finally(() => {
-                      toast.success(
-                        `Folder Category ${isEdit ? "Updated" : "Created"}.`,
-                        {
-                          duration: 5000,
-                          position: "bottom-center",
-                        }
-                      );
-                      setLoading(false);
-                      router.push("/");
-                    });
-                }
+      const uploadImage: UploadResult = await uploadBytes(imageRef, image);
+      if (uploadImage.ref) {
+        const imageUrl: string = await getDownloadURL(uploadImage.ref);
+        if (imageUrl) {
+          setFormData((prevState) => ({ ...prevState, imageUrl: imageUrl }));
+          if (isFolder) {
+            if (isEdit && id) {
+              // This update function return void
+              updateFolderCategory(id, {
+                name: formik.values.name,
+                imageUrl: imageUrl,
+              })
+                .then((_value) => resetState())
+                .catch((error) => {
+                  setError("Something went wrong category not created");
+                  console.error("Category Error: ", error);
+                  toast.error("Something went wrong");
+                })
+                .finally(() => {
+                  toast.success(
+                    `Folder Category ${isEdit ? "Updated" : "Created"}.`,
+                    {
+                      duration: 5000,
+                      position: "bottom-center",
+                    }
+                  );
+                  setLoading(false);
+                  router.push("/");
+                });
+            } else {
+              const isFolderCreated = await addFolderCategory({
+                name: formik.values.name,
+                imageUrl: imageUrl,
+              });
+              if (isFolderCreated?.id) {
+                resetState();
+                toast.success(
+                  `Folder Category ${isEdit ? "Updated" : "Created"}.`,
+                  {
+                    duration: 5000,
+                    position: "bottom-center",
+                  }
+                );
+                setLoading(false);
+                router.push("/");
               } else {
-                if (isEdit && id) {
-                  updateMenuCategory(id, {
-                    name: formData.name,
-                    description: formData.description,
-                    folderId: currentFolderId,
-                    imageUrl: url,
-                    items: formData.items,
-                    folderName: foldersData.find(
-                      (f) => f?.id === currentFolderId
-                    )?.name,
-                  })
-                    .then((_value) => resetState())
-                    .catch((error) => {
-                      setError("Something went wrong category not created");
-                      console.error("Category Error: ", error);
-                      toast.error("Something went wrong");
-                    })
-                    .finally(() => {
-                      toast.success(
-                        `Menu Category ${isEdit ? "Updated" : "Created"}.`,
-                        {
-                          duration: 5000,
-                          position: "bottom-center",
-                        }
-                      );
-                      setLoading(false);
-                      router.push("/");
-                    });
-                } else {
-                  addMenuCategory({
-                    name: formData.name,
-                    description: formData.description,
-                    folderId: currentFolderId,
-                    imageUrl: url,
-                    items: formData.items,
-                    folderName: foldersData.find(
-                      (f) => f?.id === currentFolderId
-                    )?.name,
-                  })
-                    .then((_value) => resetState())
-                    .catch((error) => {
-                      setError("Something went wrong category not created");
-                      console.error("Category Error: ", error);
-                      toast.error("Something went wrong");
-                    })
-                    .finally(() => {
-                      toast.success(
-                        `Menu Category ${isEdit ? "Updated" : "Created"}.`,
-                        {
-                          duration: 5000,
-                          position: "bottom-center",
-                        }
-                      );
-                      setLoading(false);
-                      router.push("/");
-                    });
-                }
+                setError("Something went wrong category not created");
+                console.error("Category Error: ", error);
+                toast.error("Something went wrong");
               }
-            });
+            }
+          } else {
+            if (isEdit && id) {
+              // this function return void
+              updateMenuCategory(id, {
+                name: formik.values.name,
+                description: formData.description,
+                folderId: currentFolderId,
+                imageUrl: imageUrl,
+                items: formData.items,
+                folderName: foldersData.find((f) => f?.id === currentFolderId)
+                  ?.name,
+              })
+                .then((_value) => resetState())
+                .catch((error) => {
+                  setError("Something went wrong category not created");
+                  console.error("Category Error: ", error);
+                  toast.error("Something went wrong");
+                })
+                .finally(() => {
+                  toast.success(
+                    `Menu Category ${isEdit ? "Updated" : "Created"}.`,
+                    {
+                      duration: 5000,
+                      position: "bottom-center",
+                    }
+                  );
+                  setLoading(false);
+                  router.push("/");
+                });
+            } else {
+              const isMenuCreated = await addMenuCategory({
+                name: formik.values.name,
+                description: formData.description,
+                folderId: currentFolderId,
+                imageUrl: imageUrl,
+                items: formData.items,
+                folderName: foldersData.find((f) => f?.id === currentFolderId)
+                  ?.name,
+              });
+
+              if (isMenuCreated?.id) {
+                resetState();
+                toast.success(
+                  `Menu Category ${isEdit ? "Updated" : "Created"}.`,
+                  {
+                    duration: 5000,
+                    position: "bottom-center",
+                  }
+                );
+                setLoading(false);
+                router.push("/");
+              } else {
+                setError("Something went wrong category not created");
+                console.error("Category Error: ", error);
+                toast.error("Something went wrong");
+              }
+            }
           }
-        })
-        .catch((reason: any) => {
-          setError("Image upload error");
-          console.error("Storage image upload errror: ", reason);
-          setLoading(false);
-          toast.error("Image upload error");
-        });
+        }
+      } else {
+        setError("Image upload error");
+        console.error("Storage image upload errror ");
+        setLoading(false);
+        toast.error("Image upload error");
+      }
     } else {
       if (isFolder) {
         if (isEdit && id) {
+          // this functions return void
           updateFolderCategory(id, {
-            name: formData.name,
+            name: formik.values.name,
           })
             .then((_value) => resetState())
             .catch((error) => {
@@ -216,31 +234,32 @@ const Form = ({
               router.push("/");
             });
         } else {
-          addFolderCategory({
-            name: formData.name,
-          })
-            .then((_value) => resetState())
-            .catch((error) => {
-              setError("Something went wrong category not created");
-              console.error("Category Error: ", error);
-              toast.error("Something went wrong");
-            })
-            .finally(() => {
-              toast.success(
-                `Folder Category ${isEdit ? "Updated" : "Created"}.`,
-                {
-                  duration: 5000,
-                  position: "bottom-center",
-                }
-              );
-              setLoading(false);
-              router.push("/");
-            });
+          const isFolderCreated = await addFolderCategory({
+            name: formik.values.name,
+          });
+
+          if (isFolderCreated?.id) {
+            resetState();
+            toast.success(
+              `Folder Category ${isEdit ? "Updated" : "Created"}.`,
+              {
+                duration: 5000,
+                position: "bottom-center",
+              }
+            );
+            setLoading(false);
+            router.push("/");
+          } else {
+            setError("Something went wrong category not created");
+            console.error("Category Error");
+            toast.error("Something went wrong");
+          }
         }
       } else {
         if (isEdit && id) {
+          // this function return void
           updateMenuCategory(id, {
-            name: formData.name,
+            name: formik.values.name,
             description: formData.description,
             folderId: currentFolderId,
             items: formData.items,
@@ -261,35 +280,33 @@ const Form = ({
                   position: "bottom-center",
                 }
               );
+
               setLoading(false);
               router.push("/");
             });
         } else {
-          addMenuCategory({
-            name: formData.name,
+          const isMenuCreated = await addMenuCategory({
+            name: formik.values.name,
             description: formData.description,
             folderId: currentFolderId,
             items: formData.items,
             folderName: foldersData.find((f) => f?.id === currentFolderId)
               ?.name,
-          })
-            .then((_value) => resetState())
-            .catch((error) => {
-              setError("Something went wrong category not created");
-              console.error("Category Error: ", error);
-              toast.error("Something went wrong");
-            })
-            .finally(() => {
-              toast.success(
-                `Menu Category ${isEdit ? "Updated" : "Created"}.`,
-                {
-                  duration: 5000,
-                  position: "bottom-center",
-                }
-              );
-              setLoading(false);
-              router.push("/");
+          });
+
+          if (isMenuCreated?.id) {
+            resetState();
+            toast.success(`Menu Category ${isEdit ? "Updated" : "Created"}.`, {
+              duration: 5000,
+              position: "bottom-center",
             });
+            setLoading(false);
+            router.push("/");
+          } else {
+            setError("Something went wrong category not created");
+            console.error("Category Error: ", error);
+            toast.error("Something went wrong");
+          }
         }
       }
     }
@@ -315,24 +332,52 @@ const Form = ({
     }
   };
 
+  const formik = useFormik({
+    initialValues: {
+      name: "",
+    },
+    validationSchema: validationSchema,
+    onSubmit: handleSubmit,
+  });
+
   useEffect(() => {
     if (isEdit && id !== undefined && id !== "") {
       if (isFolder) {
-        getFolderCategoryData(id).then((data) =>
-          setFormData((prevState) => ({
-            ...prevState,
-            name: data?.name,
-            imageUrl: data?.imageUrl,
-          }))
-        );
+        const getCurrentFolderData = async () => {
+          const data = await getFolderCategoryData(id);
+          if (data !== null && Object.keys(data)?.length > 0) {
+            setFormData((prevState) => ({
+              ...prevState,
+              name: data?.name,
+              imageUrl: data?.imageUrl,
+            }));
+            formik.setValues({ name: data?.name });
+          }
+        };
+
+        getCurrentFolderData();
       } else {
-        getMenuCategoryData(id).then((data) =>
-          setFormData((prevState) => ({
-            ...prevState,
-            name: data?.name,
-            imageUrl: data?.imageUrl,
-          }))
-        );
+        const getCurrentMenuData = async () => {
+          const data = await getMenuCategoryData(id);
+
+          if (
+            data !== null &&
+            data !== undefined &&
+            Object.keys(data)?.length > 0
+          ) {
+            setFormData((prevState) => ({
+              ...prevState,
+              name: data?.name,
+              imageUrl: data?.imageUrl,
+              items: data?.items,
+              description: data?.description,
+            }));
+            setCurrentFolderId(data?.folderId || "");
+            formik.setValues({ name: data?.name });
+          }
+        };
+
+        getCurrentMenuData();
       }
     }
   }, [isEdit, id]);
@@ -340,12 +385,17 @@ const Form = ({
   useEffect(() => {
     if (!isFolder) {
       setLoading(true);
-      getAllFolderCategoryData()
-        .then((folderCategories) => {
-          setFoldersData(folderCategories);
+
+      const getFolderCategories = async () => {
+        const data = await getAllFolderCategoryData();
+        if (data?.length > 0) {
+          setFoldersData(data);
           setIsFolderFetched(true);
-        })
-        .finally(() => setLoading(false));
+        }
+        setLoading(false);
+      };
+
+      getFolderCategories();
     }
   }, []);
 
@@ -358,7 +408,7 @@ const Form = ({
   }, [foldersData]);
 
   return (
-    <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+    <form className="flex flex-col gap-4" onSubmit={formik.handleSubmit}>
       {/* image input div */}
       <div
         className={"flex flex-col gap-2" + (isFolder ? " order-2" : " order-1")}
@@ -366,19 +416,19 @@ const Form = ({
         <div className="text-lg text-primary-text">Image (Optional)</div>
         <label
           className="
-                        flex
-                        flex-col
-                        gap-8
-                        justify-center
-                        items-center
-                        min-h-72
-                        border-4
-                        border-primary-text
-                        skew-y-[2deg]
-                        skew-x-6
-                        uneven
-                        text-center
-                    "
+                    flex
+                    flex-col
+                    gap-8
+                    justify-center
+                    items-center
+                    min-h-72
+                    border-4
+                    border-primary-text
+                    skew-y-[2deg]
+                    skew-x-6
+                    uneven
+                    text-center
+                "
         >
           <input
             type="file"
@@ -399,32 +449,34 @@ const Form = ({
         <div className="text-lg text-primary-text">Name</div>
         <div
           className="
-                        relative
-                        w-full
-                        border-2
-                        border-primary-text
-                        skew-y-[-1deg]
-                        skew-x-12
-                        uneven
-                        px-2
-                        py-1
-                    "
+                    relative
+                    w-full
+                    border-2
+                    border-primary-text
+                    skew-y-[-1deg]
+                    skew-x-12
+                    uneven
+                    px-2
+                    py-1
+                "
         >
           <input
             type="text"
             name="name"
-            required
             className="
-                            bg-transparent
-                            w-full
-                            focus-visible:outline-none
-                            z-10
-                        "
-            value={formData.name}
-            onChange={handleChange}
+                        bg-transparent
+                        w-full
+                        focus-visible:outline-none
+                        z-10
+                    "
+            value={formik.values.name}
+            onChange={formik.handleChange}
           />
         </div>
-        <div className="self-end text-secondary-text text-sm">{`${formData.name?.length}/50`}</div>
+        <div className="self-end text-secondary-text text-sm">{`${formik.values.name?.length}/50`}</div>
+        {formik.errors.name && formik.touched.name ? (
+          <div className="text-lg text-rose-500">{formik.errors.name}</div>
+        ) : null}
       </div>
       {/* description input div */}
       {!isFolder ? (
@@ -434,24 +486,24 @@ const Form = ({
           </div>
           <div
             className="
-                        relative
-                        w-full
-                        border-2
-                        border-primary-text
-                        skew-y-[-1deg]
-                        skew-x-12
-                        uneven
-                        px-2
-                        py-1
-                    "
+                    relative
+                    w-full
+                    border-2
+                    border-primary-text
+                    skew-y-[-1deg]
+                    skew-x-12
+                    uneven
+                    px-2
+                    py-1
+                "
           >
             <textarea
               className="
-                            bg-transparent
-                            w-full
-                            focus-visible:outline-none
-                            z-10
-                        "
+                        bg-transparent
+                        w-full
+                        focus-visible:outline-none
+                        z-10
+                    "
               name="description"
               value={formData.description}
               onChange={handleChange}
@@ -470,26 +522,26 @@ const Form = ({
           <div className="text-lg text-primary-text">Folder</div>
           <div
             className="
-                        relative
-                        w-full
-                        border-2
-                        border-primary-text
-                        skew-y-[-1deg]
-                        skew-x-12
-                        uneven
-                        px-2
-                        py-1
-                    "
+                    relative
+                    w-full
+                    border-2
+                    border-primary-text
+                    skew-y-[-1deg]
+                    skew-x-12
+                    uneven
+                    px-2
+                    py-1
+                "
           >
             <select
               name="folder"
               required
               className="
-                            bg-transparent
-                            w-full
-                            focus-visible:outline-none
-                            z-10
-                        "
+                        bg-transparent
+                        w-full
+                        focus-visible:outline-none
+                        z-10
+                    "
               value={currentFolderId}
               onChange={(e) => setCurrentFolderId(e.target.value)}
             >
@@ -521,27 +573,27 @@ const Form = ({
           <div className="text-lg text-primary-text">Items (Optional)</div>
           <div
             className="
-                        relative
-                        w-full
-                        border-2
-                        border-primary-text
-                        skew-y-[-1deg]
-                        skew-x-12
-                        uneven
-                        px-2
-                        py-1
-                    "
+                    relative
+                    w-full
+                    border-2
+                    border-primary-text
+                    skew-y-[-1deg]
+                    skew-x-12
+                    uneven
+                    px-2
+                    py-1
+                "
           >
             <input
               type="number"
               name="items"
               required
               className="
-                            bg-transparent
-                            w-full
-                            focus-visible:outline-none
-                            z-10
-                        "
+                        bg-transparent
+                        w-full
+                        focus-visible:outline-none
+                        z-10
+                    "
               value={formData.items}
               onChange={handleChange}
             />
@@ -556,16 +608,16 @@ const Form = ({
       {/* action div */}
       <div
         className="
-                    relative
-                    bottom-0
-                    flex
-                    gap-6
-                    justify-between
-                    px-6
-                    py-4
-                    mt-auto
-                    order-4
-                "
+                relative
+                bottom-0
+                flex
+                gap-6
+                justify-between
+                px-6
+                py-4
+                mt-auto
+                order-4
+            "
       >
         <Button disabled={loading} variant="secondary" navigateLink="/">
           Cancel

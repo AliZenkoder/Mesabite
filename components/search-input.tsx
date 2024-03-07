@@ -38,7 +38,7 @@ const SearchInput: React.FC<ISearchInput> = ({
                     focus-visible:outline-none
                     placeholder:text-primary-text
                 "
-        placeholder="SEARCH MENU (ex: Tajin)"
+        placeholder="SEARCH MENU"
         value={searchQuery}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
           setSearchQuery ? setSearchQuery(e.target.value) : () => {};

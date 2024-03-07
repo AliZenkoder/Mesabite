@@ -213,7 +213,7 @@ const FoldersList: React.FC<IFoldersList> = ({
                             alt="settings"
                           />
                         </div>
-                        <Link href={`/edit/cateogry/${menu?.id}`}>
+                        <Link href={`/edit-category/${menu?.id}`}>
                           <Image
                             width={28}
                             height={28}

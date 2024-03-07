@@ -18,10 +18,8 @@ const Page = async () => {
 
   return (
     <main
-      className="
-            flex
-            flex-col
-            gap-6
+      className="flex
+            flex-col gap-6
             w-full
         "
     >
