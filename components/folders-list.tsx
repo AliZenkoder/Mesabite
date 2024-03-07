@@ -87,7 +87,6 @@ const FoldersList: React.FC<IFoldersList> = ({
           }
           setSearhing(false);
         };
-
         getSearchResult();
       }, 750);
 

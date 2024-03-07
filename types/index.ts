@@ -18,4 +18,14 @@ export type FormState = {
 export type MenuItem = {
     menu: FetchMenuCategory;
     handleDeleteMenu: (id: string) => void;
-  }; 
+}; 
+
+export type AuthState = {
+    isAuth: boolean;
+    userId: string;
+    name: string;
+}
+
+export type AuthInitialState = {
+    value: AuthState;
+}

@@ -17,3 +17,6 @@
 
 - All types and interfaces are added in seperate files.
 - .then removed from (non void) functions.
+
+- Added authentication
+- Added auth middleware

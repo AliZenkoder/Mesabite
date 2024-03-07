@@ -1,5 +1,7 @@
 import { IFolderCategory, IMenuCategory } from "@/interfaces";
-import { db } from "@/utils/firebase-config";
+import { auth, db } from "@/utils/firebase-config";
+import { setCookie } from "cookies-next";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, query, updateDoc, where } from "firebase/firestore";
 
 // Collections
@@ -72,4 +74,24 @@ export const searchFromMenuCategories = async (name: string) => {
   const menuCategoriesSnapShot = await getDocs(searchQuery);
   const menuCategories = menuCategoriesSnapShot.docs.map((category) => ({ ...category.data(), id: category.id }));
   return menuCategories;
+}
+
+// Auth functions
+export const createUser = async (email: string, password: string) => {
+  try {
+    const isUserCreated = await createUserWithEmailAndPassword(auth, email, password);
+    return isUserCreated;
+  } catch (error) {
+    console.error("error: ", error);
+  }
+}
+
+export const signIn = async (email: string, password: string) => {
+  try {
+    const isSignIn = await signInWithEmailAndPassword(auth, email, password);
+    setCookie('isAuth', true);
+    return isSignIn;
+  } catch (error) {
+    console.error("error: ", error);
+  }
 }
