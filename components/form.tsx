@@ -76,21 +76,9 @@ const Form = ({
     setError("");
     formik.resetForm();
   };
-  // const  = () => {
-  //   return new Promise((resolve,reject) => {
-  //     uploadBytes(imageRef, image)
-  //       .then((value: UploadResult) => {
-  //         resolve(value)
-  //         reject()
-  //       })
-  //       .catch(() => {
 
-  //       })
-  //     })
-  // }
   const handleSubmit = async () => {
     setLoading(true);
-    // e.preventDefault();
     if (image !== null) {
       const imageRef = ref(storage, `images/${v4()}`);
       const uploadImage: UploadResult = await uploadBytes(imageRef, image);
@@ -332,6 +320,26 @@ const Form = ({
     }
   };
 
+  const handleDragOver = (e: React.DragEvent<HTMLFormElement>) => {
+    e.preventDefault();
+  };
+
+  const handleDragEnter = (e: React.DragEvent<HTMLFormElement>) => {
+    e.preventDefault();
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLFormElement>) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      setImage(files[0]);
+    }
+  };
+
   const formik = useFormik({
     initialValues: {
       name: "",
@@ -408,7 +416,14 @@ const Form = ({
   }, [foldersData]);
 
   return (
-    <form className="flex flex-col gap-4" onSubmit={formik.handleSubmit}>
+    <form
+      className="flex flex-col gap-4"
+      onSubmit={formik.handleSubmit}
+      onDragOver={handleDragOver}
+      onDragEnter={handleDragEnter}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
       {/* image input div */}
       <div
         className={"flex flex-col gap-2" + (isFolder ? " order-2" : " order-1")}
@@ -424,8 +439,8 @@ const Form = ({
                     min-h-72
                     border-4
                     border-primary-text
-                    skew-y-[2deg]
-                    skew-x-6
+                    skew-y-[-1deg]
+                    skew-x-[-1deg]
                     uneven
                     text-center
                 "
@@ -453,8 +468,7 @@ const Form = ({
                     w-full
                     border-2
                     border-primary-text
-                    skew-y-[-1deg]
-                    skew-x-12
+                    skew-x-6
                     uneven
                     px-2
                     py-1
@@ -490,8 +504,7 @@ const Form = ({
                     w-full
                     border-2
                     border-primary-text
-                    skew-y-[-1deg]
-                    skew-x-12
+                    skew-x-6
                     uneven
                     px-2
                     py-1
@@ -526,8 +539,7 @@ const Form = ({
                     w-full
                     border-2
                     border-primary-text
-                    skew-y-[-1deg]
-                    skew-x-12
+                    skew-x-6
                     uneven
                     px-2
                     py-1
@@ -577,8 +589,7 @@ const Form = ({
                     w-full
                     border-2
                     border-primary-text
-                    skew-y-[-1deg]
-                    skew-x-12
+                    skew-x-6
                     uneven
                     px-2
                     py-1

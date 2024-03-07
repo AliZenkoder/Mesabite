@@ -1,6 +1,6 @@
 import { IFolderCategory, IMenuCategory } from "@/interfaces";
 import { db } from "@/utils/firebase-config";
-import { addDoc, and, collection, deleteDoc, doc, endAt, getDoc, getDocs, or, query, startAt, updateDoc, where } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, query, updateDoc, where } from "firebase/firestore";
 
 // Collections
 export const menuCategoryCollection = collection(db, "menuCategories");

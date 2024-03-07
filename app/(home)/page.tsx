@@ -61,8 +61,8 @@ const Page = async () => {
                 min-h-72
                 border-4
                 border-primary-text
-                skew-y-[2deg]
-                skew-x-6
+                skew-y-[-1deg]
+                skew-x-[-1deg]
                 uneven
                 text-center
             "

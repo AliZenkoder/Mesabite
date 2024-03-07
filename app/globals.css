@@ -27,8 +27,8 @@ body {
 }
 
 .uneven {
-  border-top-left-radius: 64px 5%;
-  border-top-right-radius: 9% 11%;
-  border-bottom-left-radius: 57px 14%;
-  border-bottom-right-radius: 10% 40%;
+  border-top-left-radius: 47px 98px;
+  border-top-right-radius: 100px 200px;
+  border-bottom-left-radius: 90px 100px;
+  border-bottom-right-radius: 86px 353px;
 }

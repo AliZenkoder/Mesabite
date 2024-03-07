@@ -8,3 +8,9 @@
 
 - Form component polished.
 - Formik and yup added in Form component.
+
+- Drag and Drop file api added in Form component.
+- FolderItem component added.
+- MenuItem component added.
+- Inputs border radius and skew styles updated.
+- Edit folder / menu navigation added to settings icon.
