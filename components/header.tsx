@@ -3,14 +3,19 @@ import { useAppDispatch, useAppSelector } from "@/redux/store";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import Button from "@/components/button";
-import { logOut } from "@/redux/features/auth-slice";
+import {
+  getLoginStatus,
+  getLoginUser,
+  logOut,
+} from "@/redux/features/auth-slice";
 import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
 
 const Header = () => {
   const [isMount, setIsMount] = useState(false);
   const dispatch = useAppDispatch();
-  const user = useAppSelector((state) => state.authReducer.value);
+  const user = useAppSelector(getLoginUser);
+  const loginStatus = useAppSelector(getLoginStatus);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -18,15 +23,19 @@ const Header = () => {
     setIsMount(true);
   }, []);
 
-  useEffect(() => {}, [pathname, user]);
+  useEffect(() => {
+    if (
+      pathname === "/sign-in" ||
+      pathname === "/sign-up" ||
+      user.userId === ""
+    ) {
+      setIsMount(false);
+    } else {
+      setIsMount(true);
+    }
+  }, [pathname, user]);
 
-  if (
-    user?.userId === "" &&
-    isMount &&
-    (pathname === "/sign-in" || pathname === "/sign-up")
-  )
-    return null;
-  else if (isMount && user?.userId !== "")
+  if (isMount && loginStatus !== "failed" && loginStatus !== "loading")
     return (
       <header
         className="

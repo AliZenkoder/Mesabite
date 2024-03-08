@@ -1,31 +1,32 @@
 import { FetchFolderCategory, FetchMenuCategory } from "@/interfaces";
 
 export type FolderItem = {
-    folder: FetchFolderCategory;
-    handleDeleteFolder: (id: string) => void;
-    handleDeleteMenu: (id: string) => void;
-    menuData: FetchMenuCategory[] | [];
+  folder: FetchFolderCategory;
+  handleDeleteFolder: (id: string) => void;
+  handleDeleteMenu: (id: string) => void;
+  menuData: FetchMenuCategory[] | [];
 };
 
 export type FormState = {
-    name: string;
-    description: string;
-    imageUrl: string;
-    folderId: string;
-    items: number;
+  name: string;
+  description: string;
+  imageUrl: string;
+  folderId: string;
+  items: number;
 };
 
 export type MenuItem = {
-    menu: FetchMenuCategory;
-    handleDeleteMenu: (id: string) => void;
-}; 
+  menu: FetchMenuCategory;
+  handleDeleteMenu: (id: string) => void;
+};
 
 export type AuthState = {
-    isAuth: boolean;
-    userId: string;
-    name: string;
-}
+  isAuth: boolean;
+  userId: string;
+  name: string;
+};
 
 export type AuthInitialState = {
-    value: AuthState;
-}
+  value: AuthState;
+  status: "idle" | "loading" | "failed";
+};

@@ -1,9 +1,10 @@
-"use client";
 import { AuthInitialState, AuthState } from "@/types";
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { deleteCookie } from "cookies-next";
+import { createAppSlice } from "@/redux/create-app-slice";
+import { signIn } from "@/services/firestore-services";
 
-const getInitialState = () => {
+export const getInitialState = () => {
   let isUser: AuthState | null = null;
   if (typeof localStorage !== "undefined" && localStorage.length !== 0) {
     const storedUser =
@@ -17,27 +18,28 @@ const getInitialState = () => {
       userId: isUser ? isUser.userId : "",
       isAuth: isUser ? isUser.isAuth : false,
     },
+    status: "idle",
   };
   return authInitialState;
 };
 
-export const auth = createSlice({
+export const authSlice = createAppSlice({
   name: "auth",
+  // `createSlice` will infer the state type from the `initialState` argument
   initialState: getInitialState(),
-  reducers: {
-    logOut: () => {
+  // The `reducers` field lets us define reducers and generate associated actions
+  reducers: (create) => ({
+    logOut: create.reducer((state) => {
       localStorage.removeItem("user");
       deleteCookie("isAuth");
 
-      return {
-        value: {
-          name: "",
-          userId: "",
-          isAuth: false,
-        },
+      state.value = {
+        name: "",
+        userId: "",
+        isAuth: false,
       };
-    },
-    logIn: (_state, action: PayloadAction<AuthState>) => {
+    }),
+    oldLogIn: create.reducer((state, action: PayloadAction<AuthState>) => {
       const user = {
         isAuth: action.payload.isAuth,
         name: action.payload.name,
@@ -45,12 +47,45 @@ export const auth = createSlice({
       };
       // set new user in local storage
       localStorage.setItem("user", JSON.stringify(user));
-      return {
-        value: user,
-      };
-    },
+      state.value = user;
+    }),
+    logInAsync: create.asyncThunk(
+      async ({ email, password }) => {
+        const logInUser = await signIn(email, password);
+        return logInUser;
+      },
+      {
+        pending: (state) => {
+          state.status = "loading";
+        },
+        fulfilled: (state, action) => {
+          state.status = "idle";
+          state.value = {
+            isAuth: action.payload !== undefined ? true : false,
+            name:
+              action.payload?.user.displayName ||
+              action.payload?.user.email?.split("@")[0] ||
+              "Anonymous",
+            userId: action.payload?.user?.uid || "",
+          };
+          localStorage.setItem("user", JSON.stringify(state.value));
+        },
+        rejected: (state) => {
+          state.status = "failed";
+        },
+      }
+    ),
+  }),
+  // You can define your selectors here. These selectors receive the slice
+  // state as their first argument.
+  selectors: {
+    getLoginUser: (user) => user.value,
+    getLoginStatus: (user) => user.status,
   },
 });
 
-export const { logIn, logOut } = auth.actions;
-export default auth.reducer;
+// Action creators are generated for each case reducer function.
+export const { logInAsync, logOut } = authSlice.actions;
+
+// Selectors returned by `slice.selectors` take the root state as their first argument.
+export const { getLoginUser, getLoginStatus } = authSlice.selectors;

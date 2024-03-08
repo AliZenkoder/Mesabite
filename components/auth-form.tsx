@@ -1,11 +1,11 @@
 "use client";
 import React from "react";
-import { logIn } from "@/redux/features/auth-slice";
+import { logOut, logInAsync } from "@/redux/features/auth-slice";
 import { useAppDispatch } from "@/redux/store";
 import * as Yup from "yup";
 import { useFormik } from "formik";
 import Button from "@/components/button";
-import { createUser, signIn } from "@/services/firestore-services";
+import { createUser } from "@/services/firestore-services";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import Link from "next/link";
@@ -50,19 +50,10 @@ const AuthForm = ({ isLogin }: { isLogin: boolean }) => {
 
   const handleLogin = async (email: string, password: string) => {
     // TODO: Firebase login action
-    const loginUser = await signIn(email, password);
+    const loginUser = await dispatch(logInAsync({ email, password }));
+    // const loginUser = await signIn(email, password);
     if (loginUser) {
       toast.success("Welcome");
-      dispatch(
-        logIn({
-          name:
-            loginUser.user.displayName ||
-            loginUser.user.email?.split("@")[0] ||
-            "Anonymous",
-          userId: loginUser.user.uid,
-          isAuth: true,
-        })
-      );
       router.push("/");
     } else {
       toast.error("Invalid email or password", { position: "bottom-center" });
