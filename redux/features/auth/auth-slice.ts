@@ -1,5 +1,5 @@
 import { AuthInitialState, AuthState } from "@/types";
-import { PayloadAction, createSlice } from "@reduxjs/toolkit";
+import { PayloadAction } from "@reduxjs/toolkit";
 import { deleteCookie } from "cookies-next";
 import { createAppSlice } from "@/redux/create-app-slice";
 import { signIn } from "@/services/firestore-services";
@@ -17,6 +17,7 @@ export const getInitialState = () => {
       name: isUser ? isUser.name : "",
       userId: isUser ? isUser.userId : "",
       isAuth: isUser ? isUser.isAuth : false,
+      imageUrl: isUser ? isUser.imageUrl : null,
     },
     status: "idle",
   };
@@ -37,6 +38,7 @@ export const authSlice = createAppSlice({
         name: "",
         userId: "",
         isAuth: false,
+        imageUrl: null,
       };
     }),
     oldLogIn: create.reducer((state, action: PayloadAction<AuthState>) => {
@@ -44,6 +46,7 @@ export const authSlice = createAppSlice({
         isAuth: action.payload.isAuth,
         name: action.payload.name,
         userId: action.payload.userId,
+        imageUrl: action.payload.imageUrl,
       };
       // set new user in local storage
       localStorage.setItem("user", JSON.stringify(user));
@@ -67,6 +70,7 @@ export const authSlice = createAppSlice({
               action.payload?.user.email?.split("@")[0] ||
               "Anonymous",
             userId: action.payload?.user?.uid || "",
+            imageUrl: action.payload?.user?.photoURL || null,
           };
           localStorage.setItem("user", JSON.stringify(state.value));
         },

@@ -1,7 +1,7 @@
 import { configureStore, combineSlices } from "@reduxjs/toolkit";
 import type { Action, ThunkAction } from "@reduxjs/toolkit";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
-import { authSlice } from "@/redux/features/auth-slice";
+import { authSlice } from "@/redux/features/auth/auth-slice";
 
 // `combineSlices` automatically combines the reducers using
 // their `reducerPath`s, therefore we no longer need to call `combineReducers`.

@@ -20,3 +20,11 @@
 
 - Added authentication
 - Added auth middleware
+
+- RTK updated with redux thunk
+- Login updated with RTK thunk
+- Chats page added
+- Side nav added
+- Users now added in database
+- Loader added when navigate to pages
+- Header updated if profile image available it will show on header

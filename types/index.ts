@@ -24,6 +24,7 @@ export type AuthState = {
   isAuth: boolean;
   userId: string;
   name: string;
+  imageUrl: string | null | undefined;
 };
 
 export type AuthInitialState = {

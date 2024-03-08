@@ -7,12 +7,14 @@ import {
   getLoginStatus,
   getLoginUser,
   logOut,
-} from "@/redux/features/auth-slice";
+} from "@/redux/features/auth/auth-slice";
 import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
+import SideNav from "./side-nav";
 
 const Header = () => {
   const [isMount, setIsMount] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const dispatch = useAppDispatch();
   const user = useAppSelector(getLoginUser);
   const loginStatus = useAppSelector(getLoginStatus);
@@ -50,7 +52,15 @@ const Header = () => {
         "
       >
         <div className="flex gap-2 items-center">
-          <Image width={20} height={14} src="/hamburger.png" alt="menu" />
+          <SideNav isOpen={isMenuOpen} close={() => setIsMenuOpen(false)} />
+          <Image
+            width={20}
+            height={14}
+            src="/hamburger.png"
+            alt="menu"
+            className="cursor-pointer"
+            onClick={() => setIsMenuOpen(true)}
+          />
           <div className="text-lg text-primary-text">
             {user ? user?.name : ""}
           </div>
@@ -62,7 +72,12 @@ const Header = () => {
                 items-center
             "
         >
-          <Image width={30} height={30} src="/profile.png" alt="profile" />
+          <Image
+            width={48}
+            height={48}
+            src={user.imageUrl ? user.imageUrl : "/dummy-profile-48.png"}
+            alt="profile"
+          />
           {/* <Image width={15} height={9} src="/chevron-down.png" alt="arrow" /> */}
           <Button
             variant="secondary"

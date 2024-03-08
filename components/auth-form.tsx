@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { logOut, logInAsync } from "@/redux/features/auth-slice";
+import { logOut, logInAsync } from "@/redux/features/auth/auth-slice";
 import { useAppDispatch } from "@/redux/store";
 import * as Yup from "yup";
 import { useFormik } from "formik";
@@ -52,7 +52,7 @@ const AuthForm = ({ isLogin }: { isLogin: boolean }) => {
     // TODO: Firebase login action
     const loginUser = await dispatch(logInAsync({ email, password }));
     // const loginUser = await signIn(email, password);
-    if (loginUser) {
+    if (loginUser?.payload !== undefined) {
       toast.success("Welcome");
       router.push("/");
     } else {
