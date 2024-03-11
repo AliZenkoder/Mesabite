@@ -20,6 +20,7 @@ const SideNav: React.FC<ISideNav> = ({ isOpen, close }) => {
         transition-all
         duration-300
         border-r-2
+        z-50
         border-primary-text
         ${isOpen ? "left-0" : "-left-56"}
     `}

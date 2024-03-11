@@ -1,4 +1,4 @@
-import { IFolderCategory, IMenuCategory } from "@/interfaces";
+import { IFolderCategory, IMenuCategory, IUser } from "@/interfaces";
 import { auth, db } from "@/utils/firebase-config";
 import { setCookie } from "cookies-next";
 import {
@@ -7,6 +7,7 @@ import {
 } from "firebase/auth";
 import {
   addDoc,
+  and,
   collection,
   deleteDoc,
   doc,
@@ -21,7 +22,8 @@ import {
 // Collections
 export const menuCategoryCollection = collection(db, "menuCategories");
 export const folderCategoryCollection = collection(db, "folderCategories");
-export const usersCollection = collection(db, "users");
+export const userCollection = collection(db, "users");
+export const conversationCollection = collection(db, "conversations");
 
 // CRUD functions for menu cateogory
 export const addMenuCategory = async (data: IMenuCategory) => {
@@ -94,6 +96,85 @@ export const updateFolderCategory = async (
   return isUpdated;
 };
 
+// Conversation functions
+export const createConversation = async (
+  senderId: string,
+  receiverId: string
+) => {
+  // Check if conversation document already exists
+  const queryRef = query(
+    conversationCollection,
+    and(
+      where(`parties.${senderId}`, "==", true),
+      where(`parties.${receiverId}`, "==", true)
+    )
+  );
+  const querySnapshot = await getDocs(queryRef);
+
+  if (querySnapshot.empty) {
+    const usersSnapShot = await getDocs(userCollection);
+    const users = usersSnapShot.docs.map((doc) => ({
+      ...doc.data(),
+      id: doc.id,
+    }));
+
+    const sender: any = users.find((f) => f.id === senderId);
+    const receiver: any = users.find((f) => f.id === receiverId);
+
+    if (sender && receiver) {
+      // Create a new conversation document if it doesn't exist
+      const newConversation = await addDoc(conversationCollection, {
+        parties: { [senderId]: true, [receiverId]: true },
+        partiesInfo: {
+          [senderId]: {
+            name: sender?.name,
+            profilePicture: sender?.imageUrl,
+            unreadMessages: 0,
+          },
+          [receiver.id]: {
+            name: receiver?.name,
+            profilePicture: receiver?.imageUrl,
+            unreadMessages: 0,
+          },
+        },
+      });
+      if (newConversation?.id) {
+        return newConversation.id;
+      } else {
+        return null;
+      }
+    } else {
+      return null;
+    }
+  } else {
+    // Conversation already exists, handle it as needed (e.g., return existing ID)
+    const conversationDoc = querySnapshot.docs[0]; // Assuming you only want the first matching document
+    if (conversationDoc?.id) {
+      console.log("Conversation already exists:", conversationDoc.id);
+      return conversationDoc.id; // Or handle it differently based on your application logic
+    } else {
+      return null;
+    }
+  }
+};
+
+export const sendMessage = async (conversationId: string, content: string, senderId: string) => {
+  const conversationRef = doc(db, "conversations", conversationId);
+  const messagesRef = collection(conversationRef, "messages");
+
+  const addMessage = await addDoc(messagesRef, {
+    userId: senderId,
+    content,
+    createdAt: new Date(),
+  });
+
+  if (addMessage?.id) {
+    return addMessage.id
+  } else {
+    return null;
+  }
+}
+
 // Search Query functions
 export const searchFromMenuCategories = async (name: string) => {
   const searchQuery = query(menuCategoryCollection, where("name", "==", name));
@@ -141,3 +222,14 @@ export const signIn = async (email: string, password: string) => {
     console.error("error: ", error);
   }
 };
+
+export const getUserData = async (userId: string) => {
+  const userRef = doc(db, "users", userId);
+  const user = await getDoc(userRef);
+
+  if (user.exists()) {
+    return { ...user.data(), id: user.id }
+  } else {
+    return null;
+  }
+}

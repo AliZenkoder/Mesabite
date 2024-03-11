@@ -1,4 +1,4 @@
-import { FetchFolderCategory, FetchMenuCategory } from "@/interfaces";
+import { FetchFolderCategory, FetchMenuCategory, IUser } from "@/interfaces";
 
 export type FolderItem = {
   folder: FetchFolderCategory;
@@ -30,4 +30,8 @@ export type AuthState = {
 export type AuthInitialState = {
   value: AuthState;
   status: "idle" | "loading" | "failed";
+};
+
+export type UsersInitialState = {
+  value: IUser[] | [];
 };

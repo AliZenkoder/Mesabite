@@ -5,6 +5,7 @@ const nextConfig = {
         hostname:  'https://firebasestorage.googleapis.com'
     }]
  },
+ reactStrictMode: false,
  headers: () => [
     {
         source: '/:path*',

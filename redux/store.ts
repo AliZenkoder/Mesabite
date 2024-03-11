@@ -2,10 +2,11 @@ import { configureStore, combineSlices } from "@reduxjs/toolkit";
 import type { Action, ThunkAction } from "@reduxjs/toolkit";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { authSlice } from "@/redux/features/auth/auth-slice";
+import { userSlice } from "./features/users/users-slice";
 
 // `combineSlices` automatically combines the reducers using
 // their `reducerPath`s, therefore we no longer need to call `combineReducers`.
-const rootReducer = combineSlices(authSlice); // add more slices in combineSlices
+const rootReducer = combineSlices(authSlice, userSlice); // add more slices in combineSlices
 
 // Infer the `RootState` type from the root reducer
 export type RootState = ReturnType<typeof rootReducer>;

@@ -6,10 +6,15 @@ import Image from "next/image";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import Loading from "@/components/loading";
+import { useAppDispatch, useAppSelector } from "@/redux/store";
+import { setAllUsers } from "@/redux/features/users/users-slice";
+import { getLoginUser } from "@/redux/features/auth/auth-slice";
 
 const Userslist = () => {
+  const user = useAppSelector(getLoginUser);
   const [users, setUsers] = useState<any[]>([]); // State to store user data
   const [loading, setLoading] = useState(true);
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     const unsub = onSnapshot(
@@ -19,7 +24,8 @@ const Userslist = () => {
           id: doc.id,
           ...doc.data(),
         }));
-        setUsers(userDocs);
+        setUsers(userDocs.filter((f) => f.id !== user.userId));
+        dispatch(setAllUsers(userDocs as IUser[] | []));
         setLoading(false);
         console.log(userDocs); // Now includes documents ordered by createdAt (descending)
       }

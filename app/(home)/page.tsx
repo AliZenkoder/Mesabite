@@ -44,12 +44,12 @@ const Page = async () => {
           Create Cateogry Folder
         </div>
       </Link>
-      <Suspense fallback={<Loading />}>
+      {/* <Suspense fallback={<Loading />}> */}
         <FoldersList
           folderCategories={folderCategories as FetchFolderCategory[]}
           menuCategories={menuCategories as FetchMenuCategory[]}
         />
-      </Suspense>
+      {/* </Suspense> */}
       <Link
         href={"/create-category"}
         className="

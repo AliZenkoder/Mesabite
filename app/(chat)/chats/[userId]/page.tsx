@@ -1,3 +1,4 @@
+import ChatBox from "@/components/chats/chat-box";
 import React from "react";
 
 interface ChatParams {
@@ -9,7 +10,11 @@ interface IChatParams {
 }
 
 const Page: React.FC<IChatParams> = ({ params }) => {
-  return <div>{params.userId}</div>;
+  return (
+    <main className="min-h-[calc(100vh-148px)]">
+      <ChatBox id={params.userId} />
+    </main>
+  );
 };
 
 export default Page;
